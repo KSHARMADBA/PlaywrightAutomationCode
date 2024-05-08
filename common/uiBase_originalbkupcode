@@ -1,0 +1,187 @@
+import nilgiriModule from "nilgirihub";
+import { expect } from "@playwright/test";
+import { uiCommonUtils } from "../utils/uiCommonMethodModule";
+import { elementFactoryUtils } from "../utils/uiElementFactoryModule";
+import * as testData from "../resource/uiTestData/uiTestData.json";
+import * as path from 'path';
+import pageOne from "../elementFactory/pageOne";
+import { url } from "inspector";
+
+const adminPage = elementFactoryUtils.admin.pageOne
+const homePage = elementFactoryUtils.home.pageTwo
+
+
+interface NavigationParams {
+    page?: any;
+    url?: string;
+
+}
+const applicationHome = {
+
+    async validateHomePage({ page, url }: NavigationParams): Promise<void> {
+        await page.setViewportSize({ width: 1280, height: 720 });
+        await page.goto(url, { waitUntil: 'networkidle', timeout: 20000 });
+    },
+    async validatemenuItems({ page }: NavigationParams): Promise<void> {
+        const menuItems = await this.assertMenu({ page })
+        await expect(await page.locator(homePage.homePageMenu)).not.toHaveCount(0)
+        for (let i = 0; i <= menuItems.lenght; i++) {
+            expect(await menuItems[i].isVisible()).toBeTruthy();
+        }
+    },
+
+    async loginPage(page, userlogin: string) {
+        // async loginPage({ page, url }: NavigationParams): Promise<void> {
+        // await this.validateHomePage({ page, url });
+        // await page.fill(adminPage.user_name, testData.loginPayLoad.username);
+        await page.fill(adminPage.user_name, userlogin);
+        await page.fill(adminPage.password, testData.loginPayLoad.password);
+        await page.click(adminPage.login_button);
+        await expect(page).toHaveURL(testData.loginPayLoad.logInAssert);
+        const timeout = 5000
+        if (await page.isVisible(adminPage.loginSuccess, { timeout })) {
+            // await page.pause();
+            const loginSuccessMsg = await page.locator(adminPage.loginSuccess).innerText();
+            // console.log(loginSuccessMsg);
+            console.log("Login to the application with user id: ", "'", userlogin, "'", ":", loginSuccessMsg);
+
+        }
+
+    },
+
+
+    async logOut({ page, url }: NavigationParams): Promise<void> {
+
+        await page.locator(adminPage.logout_drop1).click();
+        await expect(page.locator(adminPage.logout_drop1)).toBeVisible();
+        // await page.click(adminPage.logoutDrop);
+        // await page.click(adminPage.logoutButton);
+        await page.getByText(testData.logOut.logout).click();
+        await expect(page).toHaveURL(testData.logOut.logOutAssert);
+    },
+
+    // async hubRegistration({ page, url }: NavigationParams): Promise<void> {
+    async hubRegistration(page, hub_name: string) {
+
+        // await page.locator(adminPage.dashBoard).click();
+        await page.locator(adminPage.dashBoard).click();
+        await page.locator(adminPage.hUbResiter_button).click();
+        await page.locator(adminPage.newRegister).click();
+        // Define a CSS selector for the input field
+        const hubNameInputSelector = 'input[placeholder="Enter Hub Name"]';
+        // Wait for the input field to be present and visible
+        await page.waitForSelector(hubNameInputSelector);
+        // Clear the input field to remove any previously entered data
+        // await page.click(hubNameInputSelector, { clickCount: 3 }); // Triple-click to select all text
+        // await page.keyboard.press('Backspace'); // Delete the selected text
+        // Fill the input field with the desired value
+        await page.fill(hubNameInputSelector, hub_name);
+        await page.locator(hubNameInputSelector).clear();
+        await page.waitForTimeout(3000);
+        // await page.fill(hubNameInputSelector, testData.hubRegister.hubNamefill.toString());
+        await page.fill(hubNameInputSelector, hub_name);
+        // await page.pause();
+        await page.waitForTimeout(5000);
+        await page.waitForLoadState('domcontentloaded');
+        const hubdropdown = page.locator(adminPage.hubNameDropdown);
+        await hubdropdown.selectOption("Virtual Hub");
+        const yearDropDown = page.locator(adminPage.yearofEstablishment);
+        await yearDropDown.selectOption("2017");
+        await page.fill(adminPage.visionName, testData.hubRegister.visionName);
+        await page.fill(adminPage.mission, testData.hubRegister.missionValue);
+        await page.fill(adminPage.contactNo, testData.hubRegister.contactNo);
+        await page.click(adminPage.personInchargeDrop);
+        // await page.waitForSelector(adminPage.empValue);
+        const empValueElement = await page.$$(adminPage.empValue);
+        console.log("empvalue:", empValueElement.length);
+        if (empValueElement.length == 0) {
+            await page.click(adminPage.personInchargeClose);
+        }
+        else {
+            await page.click(adminPage.empValue);
+        }
+
+        await page.fill(adminPage.address, testData.hubRegister.address);
+        await page.fill(adminPage.pincode, testData.hubRegister.pincode);
+        await page.click(adminPage.doneButton);
+        const placeDropDown = page.locator(adminPage.placeDropDown);
+        await placeDropDown.selectOption('Darbhanga City SO');
+        await page.fill(adminPage.emailId, testData.hubRegister.email.toString());
+        await page.click(adminPage.nextButton);
+        // await page.waitForTimeout(3000);
+        if (await page.isVisible(adminPage.enterHubName)) {
+            const enterHubNameMsg = await page.locator(adminPage.enterHubName).innerText();
+            // await page.mouse.up();
+            // Scroll up on the page
+            // await page.evaluate(() => {
+            // window.scrollBy(5, -window.innerHeight); // Scrolls up by one viewport height
+            // window.scrollTo(0,0)
+            //  window.scrollBy(0, document.body.scrollHeight);
+            await page.keyboard.press('Home');
+            // });
+            // Scroll up on the page using keyboard input
+            // await page.keyboard.press('PageUp');
+            // Wait for a brief moment to ensure scrolling is complete
+            await page.waitForTimeout(3000); // Adjust the timeout as needed
+            // await page.screenshot({ path: './test-results/HubNameblank.png' });
+            // console.log(enterHubNameMsg);
+            console.error("Hub Registration with: ", hub_name, "failed due to error:", enterHubNameMsg);
+            console.log("exiting the test");
+            // Gracefully exit the test if the specified condition satisfies
+            return; // Exit the function
+        }
+        else if (await page.isVisible(adminPage.personInchargeError)) {
+            const personInChargeMsg = await page.locator(adminPage.personInchargeError).innerText();
+            console.log(personInChargeMsg);
+            console.error("Hub Registration with: ", hub_name, "failed due to error:", personInChargeMsg);
+            console.log("exiting the test");
+            // Gracefully exit the test if the specified condition satisfies
+            // return; // Exit the function
+            // await page.pause();
+        }
+
+        else {
+            await page.locator(adminPage.upLoad).setInputFiles('./upload/image2.jpg');
+            await page.click(adminPage.submit);
+            console.log("Values entered successfully");
+            await page.waitForTimeout(5000);
+            // Increase timeout for message visibility
+            const timeout = 5000; // Adjust timeout duration as needed
+            if (await page.isVisible(adminPage.successMsg, { timeout })) {
+                // await page.screenshot({ path: './test-results/SuccessMsg.png' });
+                const successUpdate = await page.locator(adminPage.successMsg).innerText();
+                // Gracefully exit the test if the specified condition satisfies
+                console.log("Hub Registration with:", hub_name, successUpdate);
+                console.log("exiting the test");
+
+                // return; // Exit the function
+                // await page.pause();
+            }
+            if (await page.isVisible(adminPage.alreadyExist, { timeout })) {
+                // await page.screenshot({ path: './test-results/alreadyExist.png' });
+                const alreadyExistUpdate = await page.locator(adminPage.alreadyExist).innerText();
+                console.log("Hub Registration with:", hub_name, "failed due to error:", alreadyExistUpdate);
+                // Gracefully exit the test if the specified condition satisfies
+                console.error("Mandatory: ", alreadyExistUpdate);
+                console.log("exiting the test");
+            }
+        }
+    },
+    async assertMenu({ page }: NavigationParams): Promise<void> {
+        const menuItems = await page.locator(homePage.homePageMenu)
+        return menuItems
+    },
+    async scrollDownToLastOfPage({ page }: NavigationParams): Promise<void> {
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    },
+    async validateConactUsSection({ page }: NavigationParams): Promise<void> {
+        await page.waitForSelector(homePage.conatactUsPagelast, { state: 'visible' });
+        const contactUs = await page.locator(homePage.contactUsText).getByText("Contact us");
+        expect(contactUs).toBeTruthy();
+    }
+
+}
+export default { applicationHome }
+
+
+
