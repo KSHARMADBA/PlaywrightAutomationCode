@@ -1,0 +1,65 @@
+{
+    "postAPIUrl": "https://reqres.in/api/users",
+    "getAPIUrl": "https://reqres.in/api/unknown",
+    "tokenUrl": "https://api.escuelajs.co/api/v1/auth/login",
+    "getUserProfileUrl" : "https://api.escuelajs.co/api/v1/auth/profile",
+    "postAPIPayload":{
+        "name": "SWAT_TEAM",
+        "job": "Testing"
+      },
+    "tokenPayload":{
+        "email": "john@mail.com",
+        "password": "changeme"
+      },
+      "loginPayLoad_old":{
+        "username":"anshika.mishra@elait.com",
+        "password":"Anshika@123",
+        "logInAssert":"/dashboard"
+      },
+      "loginPayLoad":{
+        "username":"austin@dbyarforum.org",
+        "password":"Austin@123",
+        "logInAssert": "/dashboard",
+        "logInAssertOld": "/\/dashboard/"
+      },
+      "CentreAdmin":{
+        "username":"gopal@yopmail.com",
+        "password":"Gopal@123"
+      },
+      "logOut":{
+        "name":"Anshika Mishra",
+        "logout":"Logout",
+        "logOutAssert":"login"
+      },
+      "hubRegisterdata":{
+        "hub": "Hub Registration",
+        "hubNamefill": "htest115",
+        "visionName": "Save Child",
+        "missionValue": "Aim to save every child",
+        "contactNo": "7337379333",
+        "address" : "No.7, DivyaSree Point, OMR Service Rd",
+        "pincode" : "600097",
+        "email": "savechildomr@yopmail.com"
+      },
+      "hubRegister":{
+        "hubNames": "Hub",
+        "visionNames": "Vision",
+        "missionValues": "Mission",
+        "addresses": "Address",
+        "emailprefix": "email",
+        "pincode" : "600097",
+        "emailsuffix": "@yopmail.com"
+
+      },
+      "staffRegister":{
+        "fullName": "Name",
+        "Contact_No": "7847657847"
+      },
+      "staffRegisterJson":{
+        "fullName": "Jsontcthree",
+        "Contact_No": "7847657847",
+        "Email" : "jsontest2@yopmail.com"
+
+      }
+      
+}
