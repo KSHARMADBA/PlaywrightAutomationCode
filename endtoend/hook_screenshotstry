@@ -1,0 +1,59 @@
+import { setWorldConstructor, Before, After, World, ICreateAttachment } from '@cucumber/cucumber';
+import { chromium, Browser, Page } from '@playwright/test';
+import fs from 'fs';
+
+class CustomWorld implements World {
+    attach: ICreateAttachment;
+    log: Function;
+    parameters: any;
+    browser: Browser | null;
+    page: Page | null;
+
+    constructor({ attach, log, parameters }: { attach: ICreateAttachment, log: Function, parameters: any }) {
+        this.attach = attach;
+        this.log = log;
+        this.parameters = parameters;
+        this.browser = null;
+        this.page = null;
+    }
+
+    async takeScreenshot(filename: string) {
+        if (this.page) {
+            const screenshot = await this.page.screenshot();
+            fs.writeFileSync(filename, screenshot);
+        }
+    }
+}
+
+setWorldConstructor(CustomWorld);
+
+Before(async function (this: World) {
+    const world = this as unknown as CustomWorld;
+    world.browser = await chromium.launch({
+        headless: false // Set to false to run in headed mode
+    });
+    
+    const context = await world.browser.newContext({ timeout: 20000 });
+    world.page = await context.newPage();
+});
+
+After(async function (this: World) {
+    const world = this as unknown as CustomWorld;
+    const scenario = world.parameters;
+    if (scenario && world.page) {
+        const screenshotPath = `screenshots/${scenario.name}_${Date.now()}_screenshot.png`;
+        await world.takeScreenshot(screenshotPath);
+    }
+
+    // Close the page and browser after each scenario
+    await world.page?.close();
+    await world.browser?.close();
+    console.log("Test is Passing");
+});
+
+AfterStep(async function (this: World) {
+    const world = this as unknown as CustomWorld;
+    const scenario = world.parameters;
+    if (scenario.result.status === 'failed' && world.page) {
+        const screenshotPath = `screenshots/${scenario.name}_${Date.now()}_screenshot.png`;
+        await world.takeScreen

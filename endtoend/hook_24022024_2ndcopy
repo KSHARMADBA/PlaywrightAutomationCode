@@ -1,0 +1,43 @@
+import { setWorldConstructor, Before, BeforeAll, After, AfterAll } from '@cucumber/cucumber';
+import { chromium, Browser, Page, BrowserContext } from '@playwright/test';
+import fs from 'fs';
+
+let browser: Browser | undefined;
+let context: BrowserContext | undefined;
+let page: Page | undefined;
+
+BeforeAll(async function () {
+    browser = await chromium.launch({ headless: false });
+});
+
+Before(async function () {
+    if (!browser) {
+        throw new Error('Browser is not initialized');
+    }
+    context = await browser.newContext();
+    // Set the timeout after creating the context
+    await context.setDefaultTimeout(20000);
+    page = await context.newPage();
+});
+
+After(async function (pickle) {
+    if (!page) {
+        throw new Error('Page is not initialized');
+    }
+    const imgPath = `./test-results/screenshot/${pickle.result}.png`;
+    const img = await page.screenshot({ path: imgPath });
+    // Attach the screenshot
+    await this.attach(fs.readFileSync(imgPath), "image/png");
+    await page.close();
+    if (!context) {
+        throw new Error('Context is not initialized');
+    }
+    await context.close();
+    console.log("Test is passing");
+});
+
+AfterAll(async function () {
+    if (browser) {
+        await browser.close();
+    }
+});

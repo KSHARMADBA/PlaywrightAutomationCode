@@ -1,0 +1,54 @@
+
+    import { setWorldConstructor, Before, After } from '@cucumber/cucumber';
+    import { chromium, Browser, Page } from '@playwright/test';
+    import fs from 'fs';
+    // import { HookScenarioResult } from  '@cucumber/cucumber';
+    
+    class CustomWorld {
+        browser: Browser | null;
+        page: Page | null;
+    
+        constructor() {
+            this.browser = null;
+            this.page = null;
+        }
+    }
+    
+    setWorldConstructor(CustomWorld);
+    
+    
+    Before(async function () {
+        this.browser = await chromium.launch({
+            headless: false // Set to false to run in headed mode
+        });
+        
+        const context = await this.browser.newContext({ timeout: 20000 });
+        this.page = await context.newPage();
+    });
+    After(async function(scenario: HookScenarioResult) {
+        const ss = await browser.takeScreenshot();
+        const img = Buffer.alloc(ss.length, ss, 'base64');
+        this.attach(img, 'image/png');
+      });
+    
+    // After(async function (scenario) {
+    //     // await this.page.close();
+    //     // await this.browser.close();
+    //     // console.log("test is Passing")
+    //     if (this.page) {
+    //         // Capture screenshot
+    //         const screenshotPath = `screenshots/${scenario.pickle.name.replace(/ /g, '_')}.png`;
+    //         await this.page.screenshot({ path: screenshotPath });
+    //         // Attach screenshot to Cucumber report
+    //         const screenshotData = fs.readFileSync(screenshotPath);
+    //         this.attach(screenshotData, 'image/png');
+    //         // Close the browser page
+    //         await this.page.close();
+    //     }
+    //     if (this.browser) {
+    //         // Close the browser
+    //         await this.browser.close();
+    //     }
+    // });
+    
+    

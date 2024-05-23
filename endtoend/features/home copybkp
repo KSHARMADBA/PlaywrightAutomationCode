@@ -1,0 +1,6 @@
+
+    Feature: To Test DBYar Application Navigation
+
+      Scenario: Validate visibility of DBYar homepage and login
+      Given the user is on the DBYar homepage
+      Then the user should login to the application

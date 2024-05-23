@@ -1,0 +1,57 @@
+
+import { setWorldConstructor, Before, BeforeAll, After, AfterAll } from '@cucumber/cucumber';
+import { chromium, Browser, Page, BrowserContext } from '@playwright/test';
+import { pageFixture } from './pageFixture';
+import fs from 'fs';
+import pageOne from '../elementFactory/pageOne';
+import path from 'path';
+
+// class CustomWorld {
+//     browser: Browser | null;
+//     page: Page | null;
+
+//     constructor() {
+//         this.browser = null;
+//         this.page = null;
+//     }
+// }
+let page: Page;
+let browser: Browser;
+let context: BrowserContext;
+
+// setWorldConstructor(CustomWorld);
+
+BeforeAll(async function () {
+    //this.
+    browser = await chromium.launch({ headless: false });
+    // headless: false // Set to false to run in headed mode
+    // const page= await browser.newPage;
+    // pageFixture.page= page;
+});
+
+// })
+
+Before(async function () {
+    // this.browser = await chromium.launch({
+    //     headless: false // Set to false to run in headed mode
+    // });
+    const context = await this.browser.newContext({ timeout: 20000 });
+    this.page = await context.newPage();
+});
+
+After(async function (pickle) {
+    const imgPath= `./test-results/screenshot/${pickle.result}.png`;
+    const img= await pageFixture.page.screenshot({path: `./test-results/screenshot/${pickle.result}.png`, type:"png" });
+    // const img = await this.page.screenshot({ path: imgPath });
+    await this.attach(fs.readFileSync(imgPath), "image/png");
+    // await this.attach(img, "image/png");
+    await this.page.close();
+    await context.close(); 
+    console.log("test is Passing")
+});
+
+AfterAll(async function () {
+    await browser.close();
+    
+    })
+

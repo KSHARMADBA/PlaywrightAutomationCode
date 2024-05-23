@@ -1,0 +1,46 @@
+
+import { Given, When, Then, setDefaultTimeout } from '@cucumber/cucumber';
+import { chromium, Browser, Page, expect } from '@playwright/test';
+import { uiCommonUtils } from "../../utils/uiCommonMethodModule";
+// use: { actionTimeout: 10000 };
+setDefaultTimeout(60 * 1000);
+const testSpec = uiCommonUtils.uiBase.applicationHome;
+const url = "https://dbyar-ui-sit1.graytree-ea1769cb.eastasia.azurecontainerapps.io/";
+
+
+Given('the user is on the DBYaR homepage', async function () {
+  try {
+    await testSpec.validateHomePage({ page: this.page, url });
+  } catch (error) {
+    console.error("Error occurred during application loading:", error);
+    throw error; // Rethrow the error to fail the step
+  }
+});
+
+// When('the user logs in', { timeout: 60000 }, async function () {
+//   try {
+//     await testSpec.loginPage({ page: this.page });
+//   } catch (error) {
+//     console.error("Error occurred during login:", error);
+//     throw error; // Rethrow the error to fail the step
+//   }
+// });
+
+When('the user registers to the hub', async function (hub_name) {
+  await testSpec.hubRegistration(this.page, hub_name);
+  console.log("login attempt is successful", hub_name);
+});
+
+Then('the user logs out', async function () {
+  await testSpec.logOut;
+});
+
+When('the user logs in {string}', async function (userlogin) {
+  try {
+    console.log("invalid login attempt", userlogin);
+    await testSpec.loginPage(this.page, userlogin );
+  } catch (error) {
+    console.error("Error occurred during login:", error);
+    throw error; // Rethrow the error to fail the step
+  }
+});

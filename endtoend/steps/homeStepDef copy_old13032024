@@ -1,0 +1,35 @@
+
+import { Given, When, Then } from '@cucumber/cucumber';
+import { chromium, Browser, Page, expect } from '@playwright/test';
+import { uiCommonUtils } from "../../utils/uiCommonMethodModule";
+const testSpec = uiCommonUtils.uiBase.applicationHome;
+
+
+let url = "https://dbyar-ui-sit1.graytree-ea1769cb.eastasia.azurecontainerapps.io/"
+Given('the user is on the DBYaR homepage', { timeout: 30000 }, async function () {
+  try {
+    await testSpec.validateHomePage({ page: this.page, url });
+  }
+  catch (error) {
+    console.error("Error occurred during application loading:", error);
+    process.exit(1); // Indicate failure with non-zero exit code
+  }
+});
+
+When('the user logs in', { timeout: 30000 }, async function () {
+  try {
+    await testSpec.loginPage({ page: this.page });
+  } catch (error) {
+    console.error("Error occurred during login:", error);
+    throw error; // Rethrow the error to fail the step
+  }
+});
+
+When('the user registers to the hub', { timeout: 60000 }, async function () {
+  await testSpec.hubRegistration({ page: this.page });
+});
+
+Then('the user logs out', async function () {
+  await testSpec.logOut;
+});
+

@@ -1,0 +1,26 @@
+Feature: Test DBYar Application Navigation
+
+  @Kirti
+  Scenario: Validate navigation flow
+    Given the user is on the DBYaR homepage
+    When the user logs in "austin@dbyarforum.org"
+    And the user registers to the hub with ""
+    Then the user logs out
+
+  @Kirti1
+  Scenario: Validate invalid login
+    Given the user is on the DBYaR homepage
+    When the user logs in "abc@xyzmail.com" 
+
+  @Regression
+  Scenario Outline: Validate navigation flow for hub registration
+    Given the user is on the DBYaR homepage
+    When the user logs in "austin@dbyarforum.org"
+    And the user registers to the hub with "<hub_name>"
+
+    Examples: 
+      | hub_name |
+      | hxtest49  |
+      | hxtest50  |
+      | hxtest49  |
+      |   |
