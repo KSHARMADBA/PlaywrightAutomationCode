@@ -1,5 +1,5 @@
 import nilgiriModule from "nilgirihub";
-import test, { expect } from "@playwright/test";
+import  { test, expect } from "@playwright/test";
 import { uiCommonUtils } from "../utils/uiCommonMethodModule";
 import { elementFactoryUtils } from "../utils/uiElementFactoryModule";
 import * as testData from "../resource/uiTestData/uiTestData.json";
@@ -76,10 +76,12 @@ const applicationHome = {
     // Define an asynchronous function for hub registration, accepting 'page' and 'hub_name' as parameters
 
     // async hubRegistration({ page, url }: NavigationParams): Promise<void> {
-    async hubRegistration(page, hub_name: string) { // to pass execution argument
+    async hubRegistration(page, hub_name: string)  { // to pass execution argument
+        const registrationData = generateRandomHubData();
+        // const pincodeData = getRandomTestData(testData.hubRegister.pincode);
 
         // Click on the dashboard link
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(6000);
         await page.locator(adminPage.dashBoard).click();
         // Click on the hub register button
         await page.locator(adminPage.hUbResiter_button).click();
@@ -117,9 +119,9 @@ const applicationHome = {
             console.error("No valid options found in the year dropdown");
         }
         // fill all the attributes 
-        await page.fill(adminPage.visionName, testData.hubRegister.visionName);
-        await page.fill(adminPage.mission, testData.hubRegister.missionValue);
-        await page.fill(adminPage.contactNo, testData.hubRegister.contactNo);
+        await page.fill(adminPage.visionName, registrationData.visionName);
+        await page.fill(adminPage.mission, registrationData.missionValue);
+        await page.fill(adminPage.contactNo, registrationData.contactNo);
         await page.click(adminPage.personInchargeDrop);
 
         // Find all elements matching the 'empValue' selector on the page
@@ -137,7 +139,7 @@ const applicationHome = {
             await page.click(adminPage.empValue);
         }
 
-        await page.fill(adminPage.address, testData.hubRegister.address);
+        await page.fill(adminPage.address, registrationData.address);
         await page.fill(adminPage.pincode, testData.hubRegister.pincode);
         await page.click(adminPage.doneButton);
         await page.waitForTimeout(2000);
@@ -160,7 +162,7 @@ const applicationHome = {
         } else {
             console.error("No valid options found in the place dropdown");
         }
-        await page.fill(adminPage.emailId, testData.hubRegister.email.toString());
+        await page.fill(adminPage.emailId, registrationData.email.toString());
         await page.click(adminPage.nextButton);
         await page.waitForTimeout(3000);
 
@@ -168,9 +170,8 @@ const applicationHome = {
         if (await page.isVisible(adminPage.enterHubName)) {
             const hubNameValidationMsg = await page.locator(adminPage.hubNameError).innerText();
             // Scroll up on the page using keyboard input
-            await page.keyboard.press('Home');
-            // const expectedErrorMessage = "Space cannot be first or last character";
-            // const inputValue = (await page.$eval(hub_name, input => input.value)).trim();
+            await page.keyboard.press('Home');  
+            await page.waitForTimeout(5000);       
             const inputValue = hub_name;
             console.log("input value:", inputValue);
             await page.keyboard.press('Home');
@@ -196,14 +197,16 @@ const applicationHome = {
 
             }
             if (hubNameValidationMsg === expectedErrorMessage) {
-
+                await page.keyboard.press('Home'); 
                 console.log("\n Hub name validation passed with expected error message:", expectedErrorMessage);
             }
-            if (hubNameValidationMsg != expectedErrorMessage) {
-
+            if (hubNameValidationMsg !== expectedErrorMessage) { //expected
+                await page.keyboard.press('Home');
                 console.error("Hub name validation failed. Expected error message:", expectedErrorMessage, "\n but Actual Error Message Found:", hubNameValidationMsg);
                 console.error("Please raise a defect");
-                test.fail();
+                test.fail(); // actual
+                 // when if conditions(expected) satisfies and test.fail(actual) doesn't match the test fails and displays error message as 
+                             //Expected to fail, but passed.   
 
                 return; // Exit the function
 
